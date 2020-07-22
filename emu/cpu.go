@@ -1,10 +1,11 @@
 package emu
 
 type CPU struct {
-	V  [16]byte //data registers V0-VF
-	I  uint16   //index (memory address) register
-	PC uint16   //program counter
-	SP byte     //stack pointer
+	V     [16]byte   //data registers V0-VF
+	I     uint16     //index (memory address) register
+	PC    uint16     //program counter
+	SP    byte       //stack pointer
+	Stack [16]uint16 //stack
 
 	//sound registers
 	//when nonzero they decrement at 60 hertz until they reach 0

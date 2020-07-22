@@ -37,7 +37,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	for x := 0; x < emu.ScreenWidthPx; x++ {
 		for y := 0; y < emu.ScreenHeightPx; y++ {
-			g.canvas.Set(x, y, color.White)
+			if g.emulator.Display.Pixels[x][y] == 1 {
+				g.canvas.Set(x, y, color.White)
+			}
 		}
 	}
 
@@ -59,8 +61,9 @@ const (
 
 func main() {
 	romFilename := "roms/PONG.ch8"
+	// romFilename := "roms/BC_test.ch8"
 
-	ebiten.SetWindowSize(480, 480)
+	ebiten.SetWindowSize(emu.ScreenWidthPx*10, emu.ScreenHeightPx*10)
 	ebiten.SetWindowTitle("Chip-8 - " + romFilename)
 
 	game := new(Game)

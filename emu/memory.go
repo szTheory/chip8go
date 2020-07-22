@@ -15,6 +15,7 @@ type Memory struct {
 const (
 	RamProgramStart = 0x200
 	RamSize         = 0x1000
+	RamFontStart    = 0x0
 )
 
 func (m *Memory) ShouldDraw() bool {
@@ -65,6 +66,6 @@ func (m *Memory) installFont() {
 	}
 
 	for i, b := range fontBytes {
-		m.RAM[i] = b
+		m.RAM[RamFontStart+i] = b
 	}
 }
