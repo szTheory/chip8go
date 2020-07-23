@@ -7,10 +7,8 @@ type CPU struct {
 	SP    byte       //stack pointer
 	Stack [16]uint16 //stack
 
-	//sound registers
-	//when nonzero they decrement at 60 hertz until they reach 0
 	DelayTimer byte //used for timing game events, can be set/read
-	SoundTimer byte //beep when value is nonzero
+	SoundTimer byte //beeps when value is nonzero
 }
 
 func (c *CPU) Setup() {

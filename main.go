@@ -135,8 +135,8 @@ func main() {
 	// romFilename := "roms/test_opcode.ch8"
 	// romFilename := "roms/BC_test.ch8"
 	// romFilename := "roms/IBM.ch8"
-	// romFilename := "roms/TETRIS.ch8"
-	romFilename := "roms/LANDING.ch8"
+	romFilename := "roms/TETRIS.ch8"
+	// romFilename := "roms/LANDING.ch8"
 	// romFilename := "roms/KALEID.ch8"
 	// romFilename := "roms/TRON.ch8"
 

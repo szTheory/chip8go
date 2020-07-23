@@ -37,12 +37,13 @@ func (e *Emulator) Setup(romFilename string) {
 }
 
 func (e *Emulator) CatchInput(keyIndex byte) {
-	// fmt.Println("~ ~ ~ ~ ", e.waitingForInputRegisterOffset)
 	e.cpu.V[e.waitingForInputRegisterOffset] = keyIndex
 	e.Input.WaitingForInput = false
 }
 
 func (e *Emulator) EmulateCycle() {
+	// LD Vx, K
+	// Blocks execution until input is received
 	if e.Input.WaitingForInput {
 		return
 	}
@@ -53,6 +54,7 @@ func (e *Emulator) EmulateCycle() {
 	// Advance program counter
 	e.cpu.PC += 2
 
+	// Break instruction into component args
 	nnn := instruction & 0xFFF
 	n := byte(instruction & 0xF)
 	x := byte(instruction & 0xF00 >> 8)
@@ -169,7 +171,6 @@ func (e *Emulator) UpdateSoundTimer() {
 // 00E0 - CLS
 // Clear the display.
 func (e *Emulator) op00E0() {
-	fmt.Println("--- 00E0")
 	e.Display.Clear()
 }
 
@@ -178,7 +179,6 @@ func (e *Emulator) op00E0() {
 // The interpreter sets the program counter to the address at the top of
 // the stack, then subtracts 1 from the stack pointer.
 func (e *Emulator) op00EE() {
-	fmt.Println("--- 00EE")
 	e.cpu.PC = uint16(e.cpu.Stack[e.cpu.SP])
 	e.cpu.SP--
 }
@@ -188,7 +188,6 @@ func (e *Emulator) op00EE() {
 // This instruction is only used on the old computers on which Chip-8 was
 // originally implemented. It is ignored by modern interpreters.
 func (e *Emulator) op0nnn(addr uint16) {
-	fmt.Println("--- 0nnn")
 	// Do nothing.
 	// This instruction is ignored by modern interpreters
 }
@@ -197,7 +196,6 @@ func (e *Emulator) op0nnn(addr uint16) {
 // Jump to location nnn.
 // The interpreter sets the program counter to nnn.
 func (e *Emulator) op1nnn(addr uint16) {
-	fmt.Println("--- 1nnn")
 	e.cpu.PC = addr
 }
 
@@ -206,7 +204,6 @@ func (e *Emulator) op1nnn(addr uint16) {
 // The interpreter increments the stack pointer, then puts the current PC
 // on the top of the stack. The PC is then set to nnn.
 func (e *Emulator) op2nnn(addr uint16) {
-	fmt.Println("--- 2nnn")
 	e.cpu.SP++
 	e.cpu.Stack[e.cpu.SP] = e.cpu.PC
 	e.cpu.PC = addr
@@ -217,7 +214,6 @@ func (e *Emulator) op2nnn(addr uint16) {
 // The interpreter compares register Vx to kk, and if they are equal,
 // increments the program counter by 2.
 func (e *Emulator) op3xkk(x, kk byte) {
-	fmt.Println("--- 3xkk")
 	if e.cpu.V[x] == kk {
 		e.cpu.PC += 2
 	}
@@ -228,7 +224,6 @@ func (e *Emulator) op3xkk(x, kk byte) {
 // The interpreter compares register Vx to kk, and if they are not equal,
 // increments the program counter by 2.
 func (e *Emulator) op4xkk(x, kk byte) {
-	fmt.Println("--- 4xkk")
 	if e.cpu.V[x] != kk {
 		e.cpu.PC += 2
 	}
@@ -239,7 +234,6 @@ func (e *Emulator) op4xkk(x, kk byte) {
 // The interpreter compares register Vx to register Vy, and if they are equal,
 // increments the program counter by 2.
 func (e *Emulator) op5xy0(x, y byte) {
-	fmt.Println("--- 5xy0")
 	if e.cpu.V[x] == e.cpu.V[y] {
 		e.cpu.PC += 2
 	}
@@ -249,7 +243,6 @@ func (e *Emulator) op5xy0(x, y byte) {
 // Set Vx = kk.
 // The interpreter puts the value kk into register Vx.
 func (e *Emulator) op6xkk(x, kk byte) {
-	fmt.Println("--- 6xkk")
 	e.cpu.V[x] = kk
 }
 
@@ -257,7 +250,6 @@ func (e *Emulator) op6xkk(x, kk byte) {
 // Set Vx = Vx + kk.
 // Adds the value kk to the value of register Vx, then stores the result in Vx.
 func (e *Emulator) op7xkk(x, kk byte) {
-	fmt.Println("--- 7xkk")
 	e.cpu.V[x] += kk
 }
 
@@ -265,7 +257,6 @@ func (e *Emulator) op7xkk(x, kk byte) {
 // Set Vx = Vy.
 // Stores the value of register Vy in register Vx.
 func (e *Emulator) op8xy0(x, y byte) {
-	fmt.Println("--- 7xkk")
 	e.cpu.V[x] = e.cpu.V[y]
 }
 
@@ -286,7 +277,6 @@ func (e *Emulator) op8xy1(x, y byte) {
 // and if both bits are 1, then the same bit in the result is also 1.
 // Otherwise, it is 0.
 func (e *Emulator) op8xy2(x, y byte) {
-	fmt.Println("--- 8xy2")
 	e.cpu.V[x] &= e.cpu.V[y]
 }
 
@@ -322,7 +312,6 @@ func (e *Emulator) op8xy4(x, y byte) {
 // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted
 // from Vx, and the results stored in Vx.
 func (e *Emulator) op8xy5(x, y byte) {
-	fmt.Println("--- 8xy5")
 	var noBorrow byte
 	if e.cpu.V[x] > e.cpu.V[y] {
 		noBorrow = 1
@@ -337,7 +326,6 @@ func (e *Emulator) op8xy5(x, y byte) {
 // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0.
 // Then Vx is divided by 2.
 func (e *Emulator) op8xy6(x, y byte) {
-	fmt.Println("--- 8xy6")
 
 	var lsbIsOne byte
 	if (e.cpu.V[x] & 0xF) == 1 {
@@ -353,7 +341,6 @@ func (e *Emulator) op8xy6(x, y byte) {
 // If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted
 // from Vy, and the results stored in Vx.
 func (e *Emulator) op8xy7(x, y byte) {
-	fmt.Println("--- 8xy7")
 	var noBorrow byte
 	if e.cpu.V[y] > e.cpu.V[x] {
 		noBorrow = 1
@@ -382,7 +369,6 @@ func (e *Emulator) op8xyE(x, y byte) {
 // The values of Vx and Vy are compared, and if they are not equal,
 // the program counter is increased by 2.
 func (e *Emulator) op9xy0(x, y byte) {
-	fmt.Println("--- 9xy0")
 	if e.cpu.V[x] != e.cpu.V[y] {
 		e.cpu.PC += 2
 	}
@@ -392,7 +378,6 @@ func (e *Emulator) op9xy0(x, y byte) {
 // Set I = nnn.
 // The value of register I is set to nnn.
 func (e *Emulator) opAnnn(addr uint16) {
-	fmt.Println("--- Annn")
 	e.cpu.I = addr
 }
 
@@ -400,7 +385,6 @@ func (e *Emulator) opAnnn(addr uint16) {
 // Jump to location nnn + V0.
 // The program counter is set to nnn plus the value of V0.
 func (e *Emulator) opBnnn(addr uint16) {
-	fmt.Println("--- Annn")
 	e.cpu.PC = addr + uint16(e.cpu.V[0])
 }
 
@@ -410,7 +394,6 @@ func (e *Emulator) opBnnn(addr uint16) {
 // ANDed with the value kk. The results are stored in Vx. See instruction
 // 8xy2 for more information on AND.
 func (e *Emulator) opCxkk(x, kk byte) {
-	fmt.Println("--- Cxkk")
 	randomValue := byte(rand.Uint32() % 255)
 
 	e.cpu.V[x] = randomValue & kk
@@ -425,7 +408,6 @@ func (e *Emulator) opCxkk(x, kk byte) {
 // is outside the coordinates of the display, it wraps around to the opposite
 // side of the screen.
 func (e *Emulator) opDxyn(x, y, n byte) {
-	fmt.Println("--- Dxyn")
 	xVal := e.cpu.V[x]
 	yVal := e.cpu.V[y]
 
@@ -446,7 +428,6 @@ func (e *Emulator) opDxyn(x, y, n byte) {
 // Checks the keyboard, and if the key corresponding to the value
 // of Vx is currently in the down position, PC is increased by 2.
 func (e *Emulator) opEx9E(x byte) {
-	fmt.Println("--- Ex9E")
 	if e.Input.IsPressed(x) {
 		e.cpu.PC += 2
 	}
@@ -457,7 +438,6 @@ func (e *Emulator) opEx9E(x byte) {
 // Checks the keyboard, and if the key corresponding to the value of
 // Vx is currently in the up position, PC is increased by 2.
 func (e *Emulator) opExA1(x byte) {
-	fmt.Println("--- ExA1")
 	if !e.Input.IsPressed(x) {
 		e.cpu.PC += 2
 	}
@@ -467,7 +447,6 @@ func (e *Emulator) opExA1(x byte) {
 // Set Vx = delay timer value.
 // The value of DT is placed into Vx.
 func (e *Emulator) opFx07(x byte) {
-	fmt.Println("--- Fx07")
 	e.cpu.V[x] = e.cpu.DelayTimer
 }
 
@@ -475,7 +454,6 @@ func (e *Emulator) opFx07(x byte) {
 // Wait for a key press, store the value of the key in Vx.
 // All execution stops until a key is pressed, then the value of that key is stored in Vx.
 func (e *Emulator) opFx0A(x byte) {
-	fmt.Println("--- Fx0A")
 	e.Input.WaitingForInput = true
 	e.waitingForInputRegisterOffset = x
 }
@@ -484,7 +462,6 @@ func (e *Emulator) opFx0A(x byte) {
 // Set delay timer = Vx.
 // DT is set equal to the value of Vx.
 func (e *Emulator) opFx15(x byte) {
-	fmt.Println("--- Fx15")
 	e.cpu.DelayTimer = e.cpu.V[x]
 }
 
@@ -492,16 +469,13 @@ func (e *Emulator) opFx15(x byte) {
 // Set sound timer = Vx.
 // ST is set equal to the value of Vx.
 func (e *Emulator) opFx18(x byte) {
-	fmt.Println("--- Fx18")
 	e.cpu.SoundTimer = e.cpu.V[x]
-	fmt.Println("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ", e.cpu.SoundTimer)
 }
 
 // Fx1E - ADD I, Vx
 // Set I = I + Vx.
 // The values of I and Vx are added, and the results are stored in I.
 func (e *Emulator) opFx1E(x byte) {
-	fmt.Println("--- Fx15")
 	e.cpu.I += uint16(e.cpu.V[x])
 }
 
@@ -511,7 +485,6 @@ func (e *Emulator) opFx1E(x byte) {
 // to the value of Vx. See section 2.4, Display, for more information on the
 // Chip-8 hexadecimal font.
 func (e *Emulator) opFx29(x byte) {
-	fmt.Println("--- Fx29")
 	e.cpu.I = uint16(RamFontStart) + uint16(e.cpu.V[x]*PixelFontByteLength)
 }
 
@@ -521,7 +494,6 @@ func (e *Emulator) opFx29(x byte) {
 // digit in memory at location in I, the tens digit at location I+1,
 // and the ones digit at location I+2.
 func (e *Emulator) opFx33(x byte) {
-	fmt.Println("--- Fx33")
 	decimalValue := e.cpu.V[x]
 
 	e.memory.RAM[e.cpu.I] = decimalValue / 100 //hundreds
@@ -538,7 +510,6 @@ func (e *Emulator) opFx33(x byte) {
 // The interpreter copies the values of registers V0 through Vx into
 // memory, starting at the address in I.
 func (e *Emulator) opFx55(x byte) {
-	fmt.Println("--- Fx55")
 	var i byte = 0
 	for ; i <= x; i++ {
 		e.memory.RAM[e.cpu.I+uint16(i)] = e.cpu.V[i]
@@ -550,7 +521,6 @@ func (e *Emulator) opFx55(x byte) {
 // The interpreter reads values from memory starting at location I
 // into registers V0 through Vx.
 func (e *Emulator) opFx65(x byte) {
-	fmt.Println("--- Fx65")
 	var i byte = 0
 	for ; i <= x; i++ {
 		e.cpu.V[i] = e.memory.RAM[e.cpu.I+uint16(i)]
