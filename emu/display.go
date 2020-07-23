@@ -1,16 +1,16 @@
 package emu
 
+type Display struct {
+	Pixels [ScreenWidthPx][ScreenHeightPx]byte
+	Draw   bool
+}
+
 const (
 	ScreenWidthPx  = 64
 	ScreenHeightPx = 32
 
 	SpriteWidthPx = 8
 )
-
-type Display struct {
-	Pixels [ScreenWidthPx][ScreenHeightPx]byte
-	Draw   bool
-}
 
 func (d *Display) Clear() {
 	for x := 0; x < ScreenWidthPx; x++ {

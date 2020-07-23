@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/inpututil"
 	"github.com/szTheory/chip8go/emu"
 )
 
@@ -32,12 +32,55 @@ func (g *Game) Setup(romFilename string) {
 	}
 }
 
+type keyPair struct {
+	index byte
+	key   ebiten.Key
+}
+
+func keyPairs() [16]keyPair {
+	list := [16]keyPair{
+		{0, ebiten.KeyX},
+		{1, ebiten.Key1},
+		{2, ebiten.Key2},
+		{3, ebiten.Key3},
+		{4, ebiten.KeyQ},
+		{5, ebiten.KeyW},
+		{6, ebiten.KeyE},
+		{7, ebiten.KeyA},
+		{8, ebiten.KeyS},
+		{9, ebiten.KeyD},
+		{0xA, ebiten.KeyZ},
+		{0xB, ebiten.KeyC},
+		{0xC, ebiten.Key4},
+		{0xD, ebiten.KeyR},
+		{0xE, ebiten.KeyF},
+		{0xF, ebiten.KeyV},
+	}
+	return list
+}
+
 // Update the logical state
 func (g *Game) Update(screen *ebiten.Image) error {
+	inputs := keyPairs()
+	for i := 0; i < len(inputs); i++ {
+		keyIndex := inputs[i].index
+		key := inputs[i].key
+		isPressed := ebiten.IsKeyPressed(key)
+
+		g.emulator.Input.Update(keyIndex, isPressed)
+		// if isPressed {
+		// fmt.Println("....... pressed ", keyIndex)
+		// }
+		if isPressed && inpututil.IsKeyJustPressed(key) && g.emulator.Input.WaitingForInput {
+			g.emulator.CatchInput(keyIndex)
+		}
+	}
+
 	// start := time.Now()
 	for i := 0; i < cyclesPerFrame; i++ {
 		g.emulator.EmulateCycle()
 	}
+
 	// elapsed := time.Since(start)
 	// fmt.Printf("Update time ms: %d\n", elapsed.Milliseconds())
 	// fmt.Printf("TPS: %f", ebiten.CurrentTPS())
@@ -64,7 +107,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if err := screen.DrawImage(g.canvas, &ebiten.DrawImageOptions{GeoM: geometry}); err != nil {
 		panic(err)
 	}
-	fmt.Printf("FPS: %f", ebiten.CurrentFPS())
+	// fmt.Printf("FPS: %f\n", ebiten.CurrentFPS())
 	// elapsed := time.Since(start)
 	// fmt.Printf("Draw time ms: %d\n", elapsed.Milliseconds())
 
@@ -75,8 +118,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 const (
-	ScreenWidthPx  = emu.ScreenWidthPx * scaleFactor
-	ScreenHeightPx = emu.ScreenHeightPx * scaleFactor
+	ScreenWidth  = emu.ScreenWidthPx * scaleFactor
+	ScreenHeight = emu.ScreenHeightPx * scaleFactor
 )
 
 func main() {
@@ -84,11 +127,12 @@ func main() {
 	// romFilename := "roms/test_opcode.ch8"
 	// romFilename := "roms/BC_test.ch8"
 	// romFilename := "roms/IBM.ch8"
-	// romFilename := "roms/TETRIS.ch8"
+	romFilename := "roms/TETRIS.ch8"
 	// romFilename := "roms/LANDING.ch8"
-	romFilename := "roms/KALEID.ch8"
+	// romFilename := "roms/KALEID.ch8"
+	// romFilename := "roms/TRON.ch8"
 
-	ebiten.SetWindowSize(ScreenWidthPx, ScreenHeightPx)
+	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
 	ebiten.SetWindowTitle("Chip-8 - " + romFilename)
 
 	game := new(Game)

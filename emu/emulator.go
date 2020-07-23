@@ -9,7 +9,9 @@ type Emulator struct {
 	cpu     *CPU
 	memory  *Memory
 	Display *Display
-	input   *Input
+	Input   *Input
+
+	waitingForInputRegisterOffset byte
 }
 
 func (e *Emulator) Setup(romFilename string) {
@@ -22,15 +24,25 @@ func (e *Emulator) Setup(romFilename string) {
 
 	e.Display = new(Display)
 
-	e.input = new(Input)
+	e.Input = new(Input)
+}
+
+func (e *Emulator) CatchInput(keyIndex byte) {
+	// fmt.Println("~ ~ ~ ~ ", e.waitingForInputRegisterOffset)
+	e.cpu.V[e.waitingForInputRegisterOffset] = keyIndex
+	e.Input.WaitingForInput = false
 }
 
 func (e *Emulator) EmulateCycle() {
+	if e.Input.WaitingForInput {
+		return
+	}
+
 	// Fetch next instruction and advance the Program Counter
 	var instruction uint16 = (uint16(e.memory.RAM[e.cpu.PC]) << 8) | uint16(e.memory.RAM[e.cpu.PC+1])
 	e.cpu.PC += 2
 
-	fmt.Printf("%X\n", instruction)
+	// fmt.Printf("%X\n", instruction)
 
 	switch instruction {
 
@@ -324,7 +336,12 @@ func (e *Emulator) EmulateCycle() {
 			case 0x9E:
 				fmt.Println("--- Ex9E")
 				keyIndex := byte(instruction & 0xF00 >> 8)
-				if e.input.IsPressed(keyIndex) {
+				// fmt.Println("==================")
+				// fmt.Println(".......................... check press ", keyIndex)
+				// fmt.Println("==================")
+				if e.Input.IsPressed(keyIndex) {
+					// fmt.Println(".............. pressed ", keyIndex)
+					// fmt.Println(".......................... ", keyIndex)
 					e.cpu.PC += 2
 				}
 
@@ -335,7 +352,11 @@ func (e *Emulator) EmulateCycle() {
 			case 0xA1:
 				fmt.Println("--- ExA1")
 				keyIndex := byte(instruction & 0xF00 >> 8)
-				if !e.input.IsPressed(keyIndex) {
+				// fmt.Println("...check NOT press ", keyIndex)
+				// fmt.Println("==================")
+				// fmt.Println(".......................... check NOT press ", keyIndex)
+				if !e.Input.IsPressed(keyIndex) {
+					// fmt.Println("================== ", keyIndex)
 					e.cpu.PC += 2
 				}
 
@@ -354,8 +375,15 @@ func (e *Emulator) EmulateCycle() {
 				e.cpu.V[offset] = e.cpu.DelayTimer
 
 			// Fx0A - LD Vx, K
+			// Wait for a key press, store the value of the key in Vx.
+			// All execution stops until a key is pressed, then the value of that key is stored in Vx.
 			case 0x0A:
-				panic("Instruction not implemented 0x" + fmt.Sprintf("%X", instruction))
+				registerOffsetX := byte(instruction & 0xF00 >> 8)
+
+				e.Input.WaitingForInput = true
+				e.waitingForInputRegisterOffset = registerOffsetX
+				fmt.Println("$$$$$$$$$$$$$$")
+				// panic("Instruction not implemented 0x" + fmt.Sprintf("%X", instruction))
 
 			// Fx15 - LD DT, Vx
 			// Set delay timer = Vx.
@@ -401,9 +429,14 @@ func (e *Emulator) EmulateCycle() {
 				fmt.Println("--- Fx33")
 				registerOffset := byte(instruction & 0xF00 >> 8)
 				decimalValue := e.cpu.V[registerOffset]
-				e.memory.RAM[e.cpu.I] = decimalValue / 100  //hundreds
+
+				e.memory.RAM[e.cpu.I] = decimalValue / 100 //hundreds
+				decimalValue -= e.memory.RAM[e.cpu.I] * 100
+
 				e.memory.RAM[e.cpu.I+1] = decimalValue / 10 //tens
-				e.memory.RAM[e.cpu.I+2] = decimalValue / 1  //ones
+				decimalValue -= e.memory.RAM[e.cpu.I+1] * 10
+
+				e.memory.RAM[e.cpu.I+2] = decimalValue / 1 //ones
 
 			// Fx55 - LD [I], Vx
 			// Store registers V0 through Vx in memory starting at location I.
