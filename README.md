@@ -1,6 +1,6 @@
 ![chip8go](images/chip8go.png)
 
-> CHIP-8 emulator written in Go
+> a CHIP-8 emulator written in Go
 
 - [About](#about)
 - [Instructions](#instructions)
