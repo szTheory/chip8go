@@ -1,15 +1,16 @@
 package emu
 
-type Display struct {
-	Pixels [ScreenWidthPx][ScreenHeightPx]byte
-}
-
 const (
 	ScreenWidthPx  = 64
 	ScreenHeightPx = 32
 
 	SpriteWidthPx = 8
 )
+
+type Display struct {
+	Pixels [ScreenWidthPx][ScreenHeightPx]byte
+	Draw   bool
+}
 
 func (d *Display) Clear() {
 	for x := 0; x < ScreenWidthPx; x++ {
@@ -19,22 +20,27 @@ func (d *Display) Clear() {
 	}
 }
 
-// Returns true if any set pixels were changed to unset
-// false otherwise
+// Sprites are XORed onto the existing screen.
+// Returns true if any pixels were erased, false otherwise
 func (d *Display) DrawSprite(x byte, y byte, row byte) bool {
-	unset := false
+	erased := false
 
-	for i := x; i < 8; i++ {
+	for i := x; i < x+8; i++ {
 		xIndex := i % ScreenWidthPx
-		wasSet := d.Pixels[xIndex][y] == 0x1
-		set := row >> (8 - i) & 0x1
-		d.Pixels[xIndex][y] = set
-		if set == 0x0001 && wasSet {
-			unset = true
+		yIndex := y % ScreenHeightPx
+		wasSet := d.Pixels[xIndex][yIndex] == 0x1
+		value := byte(row >> (x + 8 - i - 1) & 0x1)
+
+		d.Pixels[xIndex][yIndex] ^= value
+		// newValue := d.Pixels[xIndex][y]
+		// fmt.Println(newValue)
+
+		if d.Pixels[xIndex][yIndex] == 0x0 && wasSet {
+			erased = true
 		}
 	}
 
-	return unset
+	return erased
 }
 
 // func (d *Display) Draw(mem *Memory) {
