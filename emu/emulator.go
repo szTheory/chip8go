@@ -3,15 +3,22 @@ package emu
 import (
 	"fmt"
 	"math/rand"
+
+	"github.com/hajimehoshi/ebiten/audio"
 )
 
 type Emulator struct {
-	cpu     *CPU
-	memory  *Memory
-	Display *Display
-	Input   *Input
+	cpu         *CPU
+	memory      *Memory
+	Display     *Display
+	Input       *Input
+	AudioPlayer *audio.Player
 
 	waitingForInputRegisterOffset byte
+}
+
+func (e *Emulator) SoundEnabled() bool {
+	return e.cpu.SoundTimer > 0
 }
 
 func (e *Emulator) Setup(romFilename string) {
@@ -25,6 +32,8 @@ func (e *Emulator) Setup(romFilename string) {
 	e.Display = new(Display)
 
 	e.Input = new(Input)
+
+	e.AudioPlayer = NewAudioPlayer()
 }
 
 func (e *Emulator) CatchInput(keyIndex byte) {
@@ -143,11 +152,15 @@ func (e *Emulator) EmulateCycle() {
 			panicInstructionNotImplemented(instruction)
 		}
 	}
+}
 
-	// Update timers
+func (e *Emulator) UpdateDelayTimer() {
 	if e.cpu.DelayTimer > 0 {
 		e.cpu.DelayTimer--
 	}
+}
+
+func (e *Emulator) UpdateSoundTimer() {
 	if e.cpu.SoundTimer > 0 {
 		e.cpu.SoundTimer--
 	}
@@ -481,6 +494,7 @@ func (e *Emulator) opFx15(x byte) {
 func (e *Emulator) opFx18(x byte) {
 	fmt.Println("--- Fx18")
 	e.cpu.SoundTimer = e.cpu.V[x]
+	fmt.Println("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ", e.cpu.SoundTimer)
 }
 
 // Fx1E - ADD I, Vx
@@ -539,7 +553,6 @@ func (e *Emulator) opFx65(x byte) {
 	fmt.Println("--- Fx65")
 	var i byte = 0
 	for ; i <= x; i++ {
-		fmt.Println("maxRegisterOffset: ", x)
 		e.cpu.V[i] = e.memory.RAM[e.cpu.I+uint16(i)]
 	}
 }

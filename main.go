@@ -11,7 +11,6 @@ import (
 const (
 	scaleFactor    = 10
 	cyclesPerFrame = 9
-	// cyclesPerFrame = 60
 )
 
 type Game struct {
@@ -81,9 +80,18 @@ func (g *Game) Update(screen *ebiten.Image) error {
 		g.emulator.EmulateCycle()
 	}
 
+	var volume float64
+	if g.emulator.SoundEnabled() {
+		volume = 1
+	}
+	g.emulator.AudioPlayer.SetVolume(volume)
+
 	// elapsed := time.Since(start)
 	// fmt.Printf("Update time ms: %d\n", elapsed.Milliseconds())
 	// fmt.Printf("TPS: %f", ebiten.CurrentTPS())
+
+	g.emulator.UpdateDelayTimer()
+	g.emulator.UpdateSoundTimer()
 
 	return nil
 }
@@ -127,8 +135,8 @@ func main() {
 	// romFilename := "roms/test_opcode.ch8"
 	// romFilename := "roms/BC_test.ch8"
 	// romFilename := "roms/IBM.ch8"
-	romFilename := "roms/TETRIS.ch8"
-	// romFilename := "roms/LANDING.ch8"
+	// romFilename := "roms/TETRIS.ch8"
+	romFilename := "roms/LANDING.ch8"
 	// romFilename := "roms/KALEID.ch8"
 	// romFilename := "roms/TRON.ch8"
 
