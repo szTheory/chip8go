@@ -132,13 +132,13 @@ func main() {
 	// romFilename := "roms/PONG.ch8"
 	// romFilename := "roms/test_opcode.ch8"
 	// romFilename := "roms/BC_test.ch8"
-	// romFilename := "roms/IBM.ch8"
+	romFilename := "roms/IBM.ch8"
 	// romFilename := "roms/TETRIS.ch8"
 	// romFilename := "roms/LANDING.ch8"
 	// romFilename := "roms/KALEID.ch8"
 	// romFilename := "roms/TRON.ch8"
 	// romFilename := "roms/BLINKY.ch8"
-	romFilename := "roms/BREAKOUT.ch8"
+	// romFilename := "roms/BREAKOUT.ch8"
 
 	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
 	ebiten.SetWindowTitle("Chip-8 - " + romFilename)
