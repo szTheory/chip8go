@@ -201,7 +201,8 @@ func (e *Emulator) op2nnn(addr uint16) {
 
 // 3xkk - SE Vx, byte
 // Skip next instruction if Vx = kk.
-// The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2.
+// The interpreter compares register Vx to kk, and if they are equal,
+// increments the program counter by 2.
 func (e *Emulator) op3xkk(x, kk byte) {
 	fmt.Println("--- 3xkk")
 	if e.cpu.V[x] == kk {
@@ -314,12 +315,14 @@ func (e *Emulator) op8xy5(x, y byte) {
 		noBorrow = 1
 	}
 	e.cpu.V[0xF] = noBorrow
+
 	e.cpu.V[x] -= e.cpu.V[y]
 }
 
 // 8xy6 - SHR Vx {, Vy}
 // Set Vx = Vx SHR 1.
-// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
+// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0.
+// Then Vx is divided by 2.
 func (e *Emulator) op8xy6(x, y byte) {
 	fmt.Println("--- 8xy6")
 
@@ -328,6 +331,7 @@ func (e *Emulator) op8xy6(x, y byte) {
 		lsbIsOne = 1
 	}
 	e.cpu.V[0xF] = lsbIsOne
+
 	e.cpu.V[x] >>= 1
 }
 
@@ -405,18 +409,20 @@ func (e *Emulator) opCxkk(x, kk byte) {
 // These bytes are then displayed as sprites on screen at coordinates (Vx, Vy).
 // Sprites are XORed onto the existing screen. If this causes any pixels to be erased,
 // VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it
-// is outside the coordinates of the display, it wraps around to the opposite side of the screen.
+// is outside the coordinates of the display, it wraps around to the opposite
+// side of the screen.
 func (e *Emulator) opDxyn(x, y, n byte) {
 	fmt.Println("--- Dxyn")
 	xVal := e.cpu.V[x]
 	yVal := e.cpu.V[y]
 
 	e.cpu.V[0xF] = 0
+
 	var i byte = 0
 	for ; i < n; i++ {
 		row := e.memory.RAM[e.cpu.I+uint16(i)]
 
-		if e.Display.DrawSprite(xVal, yVal+i, row) {
+		if erased := e.Display.DrawSprite(xVal, yVal+i, row); erased {
 			e.cpu.V[0xF] = 1
 		}
 	}
@@ -428,12 +434,7 @@ func (e *Emulator) opDxyn(x, y, n byte) {
 // of Vx is currently in the down position, PC is increased by 2.
 func (e *Emulator) opEx9E(x byte) {
 	fmt.Println("--- Ex9E")
-	// fmt.Println("==================")
-	// fmt.Println(".......................... check press ", keyIndex)
-	// fmt.Println("==================")
 	if e.Input.IsPressed(x) {
-		// fmt.Println(".............. pressed ", keyIndex)
-		// fmt.Println(".......................... ", keyIndex)
 		e.cpu.PC += 2
 	}
 }
@@ -444,11 +445,7 @@ func (e *Emulator) opEx9E(x byte) {
 // Vx is currently in the up position, PC is increased by 2.
 func (e *Emulator) opExA1(x byte) {
 	fmt.Println("--- ExA1")
-	// fmt.Println("...check NOT press ", keyIndex)
-	// fmt.Println("==================")
-	// fmt.Println(".......................... check NOT press ", keyIndex)
 	if !e.Input.IsPressed(x) {
-		// fmt.Println("================== ", keyIndex)
 		e.cpu.PC += 2
 	}
 }
@@ -465,9 +462,9 @@ func (e *Emulator) opFx07(x byte) {
 // Wait for a key press, store the value of the key in Vx.
 // All execution stops until a key is pressed, then the value of that key is stored in Vx.
 func (e *Emulator) opFx0A(x byte) {
+	fmt.Println("--- Fx0A")
 	e.Input.WaitingForInput = true
 	e.waitingForInputRegisterOffset = x
-	fmt.Println("$$$$$$$$$$$$$$")
 }
 
 // Fx15 - LD DT, Vx
@@ -501,7 +498,7 @@ func (e *Emulator) opFx1E(x byte) {
 // Chip-8 hexadecimal font.
 func (e *Emulator) opFx29(x byte) {
 	fmt.Println("--- Fx29")
-	e.cpu.I = uint16(RamFontStart) + uint16(e.cpu.V[x])
+	e.cpu.I = uint16(RamFontStart) + uint16(e.cpu.V[x]*PixelFontByteLength)
 }
 
 // Fx33 - LD B, Vx

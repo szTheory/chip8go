@@ -9,7 +9,8 @@ const (
 	ScreenWidthPx  = 64
 	ScreenHeightPx = 32
 
-	SpriteWidthPx = 8
+	SpriteWidthPx       = 8
+	PixelFontByteLength = 5
 )
 
 func (d *Display) Clear() {
@@ -28,23 +29,16 @@ func (d *Display) DrawSprite(x byte, y byte, row byte) bool {
 	for i := x; i < x+8; i++ {
 		xIndex := i % ScreenWidthPx
 		yIndex := y % ScreenHeightPx
-		wasSet := d.Pixels[xIndex][yIndex] == 0x1
-		value := byte(row >> (x + 8 - i - 1) & 0x1)
+
+		wasSet := d.Pixels[xIndex][yIndex] == 1
+		value := row >> (x + 8 - i - 1) & 1
 
 		d.Pixels[xIndex][yIndex] ^= value
-		// newValue := d.Pixels[xIndex][y]
-		// fmt.Println(newValue)
 
-		if d.Pixels[xIndex][yIndex] == 0x0 && wasSet {
+		if wasSet && d.Pixels[xIndex][yIndex] == 0 {
 			erased = true
 		}
 	}
 
 	return erased
 }
-
-// func (d *Display) Draw(mem *Memory) {
-// 	if !mem.ShouldDraw() {
-// 		return
-// 	}
-// }
