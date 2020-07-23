@@ -459,7 +459,6 @@ func (e *Emulator) opFx07(x byte) {
 // Wait for a key press, store the value of the key in Vx.
 // All execution stops until a key is pressed, then the value of that key is stored in Vx.
 func (e *Emulator) opFx0A(x byte) {
-	fmt.Println("~ ~ ~ ~ WAITING FOR KEY PRESS ~ ~ ~ ~")
 	e.Input.WaitingForInput = true
 	e.waitingForInputRegisterOffset = x
 }

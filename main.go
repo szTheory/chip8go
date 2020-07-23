@@ -14,13 +14,14 @@ const (
 )
 
 type Game struct {
-	emulator *emu.Emulator
-	canvas   *ebiten.Image
+	emulator    *emu.Emulator
+	canvas      *ebiten.Image
+	romFilename string
 }
 
-func (g *Game) Setup(romFilename string) {
+func (g *Game) Reset() {
 	g.emulator = new(emu.Emulator)
-	g.emulator.Setup(romFilename)
+	g.emulator.Setup(g.romFilename)
 
 	var err error
 	if g.canvas, err = ebiten.NewImage(emu.ScreenWidthPx, emu.ScreenHeightPx, ebiten.FilterDefault); err != nil {
@@ -62,6 +63,10 @@ func keyPairs() [16]keyPair {
 // Update the logical state
 func (g *Game) Update(screen *ebiten.Image) error {
 	inputs := keyPairs()
+
+	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		g.Reset()
+	}
 
 	for i := 0; i < cyclesPerFrame; i++ {
 		// update inputs
@@ -124,7 +129,7 @@ const (
 )
 
 func main() {
-	romFilename := "roms/PONG.ch8"
+	// romFilename := "roms/PONG.ch8"
 	// romFilename := "roms/test_opcode.ch8"
 	// romFilename := "roms/BC_test.ch8"
 	// romFilename := "roms/IBM.ch8"
@@ -133,13 +138,13 @@ func main() {
 	// romFilename := "roms/KALEID.ch8"
 	// romFilename := "roms/TRON.ch8"
 	// romFilename := "roms/BLINKY.ch8"
-	// romFilename := "roms/BREAKOUT.ch8"
+	romFilename := "roms/BREAKOUT.ch8"
 
 	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
 	ebiten.SetWindowTitle("Chip-8 - " + romFilename)
 
-	game := new(Game)
-	game.Setup(romFilename)
+	game := &Game{romFilename: romFilename}
+	game.Reset()
 
 	if err := ebiten.RunGame(game); err != nil {
 		panic(err)

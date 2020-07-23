@@ -12,9 +12,15 @@ const (
 )
 
 func NewAudioPlayer() *audio.Player {
-	audioContext, err := audio.NewContext(sampleRate)
-	if err != nil {
-		panic(err)
+	var audioContext *audio.Context
+	if currentContext := audio.CurrentContext(); currentContext != nil {
+		audioContext = currentContext
+	} else {
+		var err error
+		audioContext, err = audio.NewContext(sampleRate)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Pass the (infinite) stream to audio.NewPlayer.
