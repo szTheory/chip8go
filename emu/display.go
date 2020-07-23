@@ -25,10 +25,10 @@ func (d *Display) Clear() {
 // Returns true if any pixels were erased, false otherwise
 func (d *Display) DrawSprite(x byte, y byte, row byte) bool {
 	erased := false
+	yIndex := y % ScreenHeightPx
 
 	for i := x; i < x+8; i++ {
 		xIndex := i % ScreenWidthPx
-		yIndex := y % ScreenHeightPx
 
 		wasSet := d.Pixels[xIndex][yIndex] == 1
 		value := row >> (x + 8 - i - 1) & 1

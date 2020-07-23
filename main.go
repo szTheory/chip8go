@@ -67,15 +67,11 @@ func (g *Game) Update(screen *ebiten.Image) error {
 		isPressed := ebiten.IsKeyPressed(key)
 
 		g.emulator.Input.Update(keyIndex, isPressed)
-		// if isPressed {
-		// fmt.Println("....... pressed ", keyIndex)
-		// }
 		if isPressed && inpututil.IsKeyJustPressed(key) && g.emulator.Input.WaitingForInput {
 			g.emulator.CatchInput(keyIndex)
 		}
 	}
 
-	// start := time.Now()
 	for i := 0; i < cyclesPerFrame; i++ {
 		g.emulator.EmulateCycle()
 	}
@@ -86,10 +82,6 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	}
 	g.emulator.AudioPlayer.SetVolume(volume)
 
-	// elapsed := time.Since(start)
-	// fmt.Printf("Update time ms: %d\n", elapsed.Milliseconds())
-	// fmt.Printf("TPS: %f", ebiten.CurrentTPS())
-
 	g.emulator.UpdateDelayTimer()
 	g.emulator.UpdateSoundTimer()
 
@@ -98,7 +90,6 @@ func (g *Game) Update(screen *ebiten.Image) error {
 
 // Render the screen
 func (g *Game) Draw(screen *ebiten.Image) {
-	// start := time.Now()
 	for x := 0; x < emu.ScreenWidthPx; x++ {
 		for y := 0; y < emu.ScreenHeightPx; y++ {
 			setColor := color.Black
@@ -115,10 +106,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if err := screen.DrawImage(g.canvas, &ebiten.DrawImageOptions{GeoM: geometry}); err != nil {
 		panic(err)
 	}
-	// fmt.Printf("FPS: %f\n", ebiten.CurrentFPS())
-	// elapsed := time.Since(start)
-	// fmt.Printf("Draw time ms: %d\n", elapsed.Milliseconds())
-
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

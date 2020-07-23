@@ -22,17 +22,22 @@ func (e *Emulator) SoundEnabled() bool {
 }
 
 func (e *Emulator) Setup(romFilename string) {
+	// cpu
 	e.cpu = new(CPU)
 	e.cpu.Setup()
 
+	// memory
 	e.memory = new(Memory)
 	e.memory.Setup()
 	e.memory.LoadGame(romFilename)
 
+	// display
 	e.Display = new(Display)
 
+	// input
 	e.Input = new(Input)
 
+	// audio
 	e.AudioPlayer = NewAudioPlayer()
 }
 

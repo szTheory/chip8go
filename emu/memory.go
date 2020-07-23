@@ -5,11 +5,11 @@ import (
 )
 
 type Memory struct {
-	//the uppermost 256 bytes (0xF00-0xFFF) are reserved for display refresh,
-	//and the 96 bytes below that (0xEA0-0xEFF) are reserved for the call stack,
-	//internal use, and other variables
-	RAM [RamSize]byte //4KB (4,096 bytes) from 0x000 (0) to 0xFFF (4095)
-	// Stack [16]uint16   //only used to store return addresses of subroutines
+	// 4KB (4,096 bytes) from 0x000 (0) to 0xFFF (4095)
+	// the uppermost 256 bytes (0xF00-0xFFF) are reserved for display refresh,
+	// and the 96 bytes below that (0xEA0-0xEFF) are reserved for the call stack,
+	// internal use, and other variables
+	RAM [RamSize]byte
 }
 
 const (
@@ -17,11 +17,6 @@ const (
 	RamSize              = 0x1000
 	RamFontStart    byte = 0x0
 )
-
-func (m *Memory) ShouldDraw() bool {
-	// TODO: check memory state to see if should draw or not
-	return true
-}
 
 func (m *Memory) Setup() {
 	m.installFont()

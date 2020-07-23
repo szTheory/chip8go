@@ -38,13 +38,13 @@ type stream struct {
 	remaining []byte
 }
 
-// Read is io.Reader's Read.
-//
+// Read from io.Reader
 // Read fills the data with sine wave samples.
 func (s *stream) Read(buf []byte) (int, error) {
 	if len(s.remaining) > 0 {
 		n := copy(buf, s.remaining)
 		s.remaining = s.remaining[n:]
+
 		return n, nil
 	}
 
@@ -55,14 +55,16 @@ func (s *stream) Read(buf []byte) (int, error) {
 	}
 
 	const length = int64(sampleRate / frequency)
+	const max = 32767
+
 	p := s.position / 4
 	for i := 0; i < len(buf)/4; i++ {
-		const max = 32767
 		b := int16(math.Sin(2*math.Pi*float64(p)/float64(length)) * max)
 		buf[4*i] = byte(b)
 		buf[4*i+1] = byte(b >> 8)
 		buf[4*i+2] = byte(b)
 		buf[4*i+3] = byte(b >> 8)
+
 		p++
 	}
 
@@ -72,12 +74,14 @@ func (s *stream) Read(buf []byte) (int, error) {
 	if origBuf != nil {
 		n := copy(origBuf, buf)
 		s.remaining = buf[n:]
+
 		return n, nil
 	}
+
 	return len(buf), nil
 }
 
-// Close is io.Closer's Close.
+// Close from io.Closer
 func (s *stream) Close() error {
 	return nil
 }
