@@ -433,7 +433,7 @@ func (e *Emulator) opDxyn(x, y, n byte) {
 // Checks the keyboard, and if the key corresponding to the value
 // of Vx is currently in the down position, PC is increased by 2.
 func (e *Emulator) opEx9E(x byte) {
-	if e.Input.IsPressed(x) {
+	if e.Input.IsPressed(e.cpu.V[x]) {
 		e.cpu.PC += 2
 	}
 }
@@ -443,7 +443,7 @@ func (e *Emulator) opEx9E(x byte) {
 // Checks the keyboard, and if the key corresponding to the value of
 // Vx is currently in the up position, PC is increased by 2.
 func (e *Emulator) opExA1(x byte) {
-	if !e.Input.IsPressed(x) {
+	if !e.Input.IsPressed(e.cpu.V[x]) {
 		e.cpu.PC += 2
 	}
 }
@@ -459,6 +459,7 @@ func (e *Emulator) opFx07(x byte) {
 // Wait for a key press, store the value of the key in Vx.
 // All execution stops until a key is pressed, then the value of that key is stored in Vx.
 func (e *Emulator) opFx0A(x byte) {
+	fmt.Println("~ ~ ~ ~ WAITING FOR KEY PRESS ~ ~ ~ ~")
 	e.Input.WaitingForInput = true
 	e.waitingForInputRegisterOffset = x
 }

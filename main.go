@@ -10,7 +10,7 @@ import (
 
 const (
 	scaleFactor    = 10
-	cyclesPerFrame = 9
+	cyclesPerFrame = 10
 )
 
 type Game struct {
@@ -55,33 +55,39 @@ func keyPairs() [16]keyPair {
 		{0xE, ebiten.KeyF},
 		{0xF, ebiten.KeyV},
 	}
+
 	return list
 }
 
 // Update the logical state
 func (g *Game) Update(screen *ebiten.Image) error {
 	inputs := keyPairs()
-	for i := 0; i < len(inputs); i++ {
-		keyIndex := inputs[i].index
-		key := inputs[i].key
-		isPressed := ebiten.IsKeyPressed(key)
-
-		g.emulator.Input.Update(keyIndex, isPressed)
-		if isPressed && inpututil.IsKeyJustPressed(key) && g.emulator.Input.WaitingForInput {
-			g.emulator.CatchInput(keyIndex)
-		}
-	}
 
 	for i := 0; i < cyclesPerFrame; i++ {
+		// update inputs
+		for i := 0; i < len(inputs); i++ {
+			keyIndex := inputs[i].index
+			key := inputs[i].key
+			isPressed := ebiten.IsKeyPressed(key)
+
+			g.emulator.Input.Update(keyIndex, isPressed)
+			if isPressed && inpututil.IsKeyJustPressed(key) && g.emulator.Input.WaitingForInput {
+				g.emulator.CatchInput(keyIndex)
+			}
+		}
+
+		// emulate a cycle
 		g.emulator.EmulateCycle()
 	}
 
+	// update audio
 	var volume float64
 	if g.emulator.SoundEnabled() {
 		volume = 1
 	}
 	g.emulator.AudioPlayer.SetVolume(volume)
 
+	// update timers
 	g.emulator.UpdateDelayTimer()
 	g.emulator.UpdateSoundTimer()
 
@@ -118,14 +124,16 @@ const (
 )
 
 func main() {
-	// romFilename := "roms/PONG.ch8"
+	romFilename := "roms/PONG.ch8"
 	// romFilename := "roms/test_opcode.ch8"
 	// romFilename := "roms/BC_test.ch8"
 	// romFilename := "roms/IBM.ch8"
-	romFilename := "roms/TETRIS.ch8"
+	// romFilename := "roms/TETRIS.ch8"
 	// romFilename := "roms/LANDING.ch8"
 	// romFilename := "roms/KALEID.ch8"
 	// romFilename := "roms/TRON.ch8"
+	// romFilename := "roms/BLINKY.ch8"
+	// romFilename := "roms/BREAKOUT.ch8"
 
 	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
 	ebiten.SetWindowTitle("Chip-8 - " + romFilename)
