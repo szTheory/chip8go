@@ -2,6 +2,8 @@
 
 > a CHIP-8 emulator written in Go
 
+![Brix](images/brix.gif)
+
 - [About](#about)
 - [Instructions](#instructions)
 - [Controls](#controls)
