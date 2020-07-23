@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"image/color"
+	"path"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/inpututil"
+	"github.com/sqweek/dialog"
 	"github.com/szTheory/chip8go/emu"
 )
 
@@ -15,21 +18,12 @@ const (
 
 type Game struct {
 	emulator    *emu.Emulator
-	canvas      *ebiten.Image
 	romFilename string
 }
 
 func (g *Game) Reset() {
 	g.emulator = new(emu.Emulator)
 	g.emulator.Setup(g.romFilename)
-
-	var err error
-	if g.canvas, err = ebiten.NewImage(emu.ScreenWidthPx, emu.ScreenHeightPx, ebiten.FilterDefault); err != nil {
-		panic(err)
-	}
-	if err := g.canvas.Fill(color.Black); err != nil {
-		panic(err)
-	}
 }
 
 type keyPair struct {
@@ -64,6 +58,7 @@ func keyPairs() [16]keyPair {
 func (g *Game) Update(screen *ebiten.Image) error {
 	inputs := keyPairs()
 
+	// Enter key resets game
 	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
 		g.Reset()
 	}
@@ -101,20 +96,29 @@ func (g *Game) Update(screen *ebiten.Image) error {
 
 // Render the screen
 func (g *Game) Draw(screen *ebiten.Image) {
+	var err error
+	var canvas *ebiten.Image
+	if canvas, err = ebiten.NewImage(emu.ScreenWidthPx, emu.ScreenHeightPx, ebiten.FilterDefault); err != nil {
+		panic(err)
+	}
+	if err := canvas.Fill(color.Black); err != nil {
+		panic(err)
+	}
+
 	for x := 0; x < emu.ScreenWidthPx; x++ {
 		for y := 0; y < emu.ScreenHeightPx; y++ {
 			setColor := color.Black
 			if g.emulator.Display.Pixels[x][y] == 1 {
 				setColor = color.White
 			}
-			if setColor != g.canvas.At(x, y) {
-				g.canvas.Set(x, y, setColor)
+			if setColor != canvas.At(x, y) {
+				canvas.Set(x, y, setColor)
 			}
 		}
 	}
 
 	geometry := ebiten.GeoM{}
-	if err := screen.DrawImage(g.canvas, &ebiten.DrawImageOptions{GeoM: geometry}); err != nil {
+	if err := screen.DrawImage(canvas, &ebiten.DrawImageOptions{GeoM: geometry}); err != nil {
 		panic(err)
 	}
 }
@@ -129,24 +133,32 @@ const (
 )
 
 func main() {
-	// romFilename := "roms/PONG.ch8"
-	// romFilename := "roms/test_opcode.ch8"
-	// romFilename := "roms/BC_test.ch8"
-	// romFilename := "roms/IBM.ch8"
-	// romFilename := "roms/TETRIS.ch8"
-	// romFilename := "roms/LANDING.ch8"
-	// romFilename := "roms/KALEID.ch8"
-	// romFilename := "roms/TRON.ch8"
-	// romFilename := "roms/BLINKY.ch8"
-	romFilename := "roms/BREAKOUT.ch8"
+	game := new(Game)
+	if err := game.pickGame(); err != nil {
+		return
+	}
 
 	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
-	ebiten.SetWindowTitle("Chip-8 - " + romFilename)
-
-	game := &Game{romFilename: romFilename}
-	game.Reset()
-
 	if err := ebiten.RunGame(game); err != nil {
 		panic(err)
 	}
+}
+
+func (g *Game) pickGame() error {
+	romFilename, err := dialog.File().Filter("CHIP-8 game file", "ch8").Load()
+	if err != nil {
+		return err
+	}
+	if romFilename == "" {
+		return errors.New("No game selected")
+	}
+
+	g.loadGame(romFilename)
+	return nil
+}
+
+func (g *Game) loadGame(romFilename string) {
+	ebiten.SetWindowTitle("Chip-8 - " + path.Base(romFilename))
+	g.romFilename = romFilename
+	g.Reset()
 }
