@@ -12,7 +12,7 @@ func TestOpFx65(t *testing.T) {
 	e.cpu.I = uint16(address)
 	e.memory.RAM[address] = expected
 	i := uint16(0xFF65)
-	e.opFx65(i)
+	e.opFx65(byte(i & 0xF00 >> 8))
 
 	for i := 0; i <= 0xF; i++ {
 		actual := e.cpu.V[0]
