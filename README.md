@@ -7,6 +7,7 @@
 - [About](#about)
 - [Instructions](#instructions)
 - [Controls](#controls)
+- [Games](#games)
 
 ## About
 
@@ -18,7 +19,7 @@ CHIP-8 is an interpreted programming language originally designed for hobby comp
 
 ## Instructions
 
-Download chip8go and run the program. A file dialog box will appear, where you choose a game file to load with extension `.ch8`. Several quality public domain game files are included in the `games` folder.
+Download chip8go and run the program. A file dialog box will appear to choose a `.ch8` game file. Several quality public domain game files are included in the `games` folder.
 
 ## Controls
 
@@ -33,7 +34,7 @@ A S D F
 Z X C V
 ```
 
-Each of which corresponds to the original CHIP-8 keyboard layout:
+Each corresponding to keys on the original CHIP-8 layout:
 
 ```ascii
 C D E F
@@ -41,3 +42,35 @@ C D E F
 4 5 6 7
 0 1 2 3
 ```
+
+## Games
+
+### Brix
+
+![Brix](images/brix.gif)
+
+`Q` move left
+`E` move right
+
+### Pong 2
+
+![Pong 2](images/pong2.gif)
+
+#### Player 1
+
+`1` Move up
+`Q` Move down
+
+#### Player 2
+
+`4` Move up
+`R` Move down
+
+### Tetris
+
+![Tetris](images/tetris.gif)
+
+`W` Move left
+`E` Move right
+`Q` Rotate
+`A` Fast drop
