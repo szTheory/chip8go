@@ -11,47 +11,28 @@ import (
 	"github.com/szTheory/chip8go/emu"
 )
 
+func main() {
+	game := new(Game)
+	if err := game.pickGame(); err != nil {
+		return
+	}
+
+	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
+	if err := ebiten.RunGame(game); err != nil {
+		panic(err)
+	}
+}
+
 const (
 	scaleFactor    = 10
 	cyclesPerFrame = 10
+	ScreenWidth    = emu.ScreenWidthPx * scaleFactor
+	ScreenHeight   = emu.ScreenHeightPx * scaleFactor
 )
 
 type Game struct {
 	emulator    *emu.Emulator
 	romFilename string
-}
-
-func (g *Game) Reset() {
-	g.emulator = new(emu.Emulator)
-	g.emulator.Setup(g.romFilename)
-}
-
-type keyPair struct {
-	index byte
-	key   ebiten.Key
-}
-
-func keyPairs() [16]keyPair {
-	list := [16]keyPair{
-		{0, ebiten.KeyX},
-		{1, ebiten.Key1},
-		{2, ebiten.Key2},
-		{3, ebiten.Key3},
-		{4, ebiten.KeyQ},
-		{5, ebiten.KeyW},
-		{6, ebiten.KeyE},
-		{7, ebiten.KeyA},
-		{8, ebiten.KeyS},
-		{9, ebiten.KeyD},
-		{0xA, ebiten.KeyZ},
-		{0xB, ebiten.KeyC},
-		{0xC, ebiten.Key4},
-		{0xD, ebiten.KeyR},
-		{0xE, ebiten.KeyF},
-		{0xF, ebiten.KeyV},
-	}
-
-	return list
 }
 
 // Update the logical state
@@ -60,7 +41,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 
 	// Enter key resets game
 	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
-		g.Reset()
+		g.reset()
 	}
 
 	for i := 0; i < cyclesPerFrame; i++ {
@@ -127,21 +108,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 	return emu.ScreenWidthPx, emu.ScreenHeightPx
 }
 
-const (
-	ScreenWidth  = emu.ScreenWidthPx * scaleFactor
-	ScreenHeight = emu.ScreenHeightPx * scaleFactor
-)
-
-func main() {
-	game := new(Game)
-	if err := game.pickGame(); err != nil {
-		return
-	}
-
-	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
-	if err := ebiten.RunGame(game); err != nil {
-		panic(err)
-	}
+func (g *Game) reset() {
+	g.emulator = new(emu.Emulator)
+	g.emulator.Setup(g.romFilename)
 }
 
 func (g *Game) pickGame() error {
@@ -160,5 +129,33 @@ func (g *Game) pickGame() error {
 func (g *Game) loadGame(romFilename string) {
 	ebiten.SetWindowTitle("Chip-8 - " + path.Base(romFilename))
 	g.romFilename = romFilename
-	g.Reset()
+	g.reset()
+}
+
+type keyPair struct {
+	index byte
+	key   ebiten.Key
+}
+
+func keyPairs() [16]keyPair {
+	list := [16]keyPair{
+		{0, ebiten.KeyX},
+		{1, ebiten.Key1},
+		{2, ebiten.Key2},
+		{3, ebiten.Key3},
+		{4, ebiten.KeyQ},
+		{5, ebiten.KeyW},
+		{6, ebiten.KeyE},
+		{7, ebiten.KeyA},
+		{8, ebiten.KeyS},
+		{9, ebiten.KeyD},
+		{0xA, ebiten.KeyZ},
+		{0xB, ebiten.KeyC},
+		{0xC, ebiten.Key4},
+		{0xD, ebiten.KeyR},
+		{0xE, ebiten.KeyF},
+		{0xF, ebiten.KeyV},
+	}
+
+	return list
 }
