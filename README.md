@@ -49,8 +49,8 @@ C D E F
 
 ![Brix](images/brix.gif)
 
-`Q` move left
-`E` move right
+- `Q` move left
+- `E` move right
 
 ### Pong 2
 
@@ -58,27 +58,27 @@ C D E F
 
 #### Player 1
 
-`1` Move up
-`Q` Move down
+- `1` Move up
+- `Q` Move down
 
 #### Player 2
 
-`4` Move up
-`R` Move down
+- `4` Move up
+- `R` Move down
 
 ### Tetris
 
 ![Tetris](images/tetris.gif)
 
-`W` Move left
-`E` Move right
-`Q` Rotate
-`A` Fast drop
+- `W` Move left
+- `E` Move right
+- `Q` Rotate
+- `A` Fast drop
 
 ### UFO
 
 ![Tetris](images/ufo.gif)
 
-`Q` Shoot left
-`W` Shoot up
-`E` Shoot right
+- `Q` Shoot left
+- `W` Shoot up
+- `E` Shoot right
