@@ -19,7 +19,7 @@ CHIP-8 is an interpreted programming language originally designed for hobby comp
 
 ## Instructions
 
-Download chip8go and run the program. A file dialog box will appear to choose a `.ch8` game file. Several quality public domain game files are included in the `games` folder.
+Download chip8go and run the program. A file dialog will appear for you to choose a `.ch8` game. Several quality public domain games are included in the `games` folder.
 
 ## Controls
 
@@ -74,3 +74,11 @@ C D E F
 `E` Move right
 `Q` Rotate
 `A` Fast drop
+
+### UFO
+
+![Tetris](images/ufo.gif)
+
+`Q` Shoot left
+`W` Shoot up
+`E` Shoot right
